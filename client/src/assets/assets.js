@@ -131,7 +131,7 @@ export const dummyPostsData = [
         ],
         "post_type": "text_with_image",
         "likes_count": [],
-        "createdAt": "2025-07-16T05:54:31.191Z",
+        "createdAt": "2025-12-16T05:54:31.191Z",
         "updatedAt": "2025-07-16T05:54:31.191Z",
     },
     {
@@ -141,7 +141,7 @@ export const dummyPostsData = [
         "image_urls": [],
         "post_type": "text",
         "likes_count": [],
-        "createdAt": "2025-07-09T13:22:12.601Z",
+        "createdAt": "2026-01-09T13:22:12.601Z",
         "updatedAt": "2025-07-09T13:22:12.601Z",
     },
     {

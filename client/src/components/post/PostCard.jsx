@@ -2,14 +2,24 @@ import React, { useState } from 'react'
 import { BadgeCheck, Heart, MessageCircle, Share2 } from 'lucide-react'
 import moment from 'moment'
 import { dummyUserData } from '../../assets/assets';
+import { useNavigate } from 'react-router-dom';
 const PostCard = ({ postData }) => {
+  const navigate = useNavigate();
 
-  const [likes, setLikes] = useState(postData.likes_count);
+  const [likes, setLikes] = useState(postData.likes_count); // likes_count
   const currentUser = dummyUserData;
 
   const handleLikes = () => {
-    
-  }
+    // setLikes((prevLikes) => {
+    //   // if already liked → unlike
+    //   if (prevLikes.includes(currentUser._id)) {
+    //     return prevLikes.filter((id) => id !== currentUser._id);
+    //   }
+
+    //   // if not liked → like
+    //   return [...prevLikes, currentUser._id];
+    // });
+  };
 
   // style sentence star with hashtag
   const renderContentWithHashtags = (text) => {
@@ -23,7 +33,7 @@ const PostCard = ({ postData }) => {
         </span>
       ) : (
         part
-      )
+      ),
     );
   };
 
@@ -31,7 +41,10 @@ const PostCard = ({ postData }) => {
     <div className="bg-white w-full rounded-xl shadow p-4 space-y-4 max-w-2xl">
       <div>
         {/* user info */}
-        <div className="inline-flex items-center gap-4 cursor-pointer">
+        <div
+          onClick={() => navigate(`/profile/${postData.user._id}`)}
+          className="inline-flex items-center gap-4 cursor-pointer"
+        >
           <img
             src={postData.user.profile_picture}
             alt=""
@@ -80,13 +93,11 @@ const PostCard = ({ postData }) => {
             <span>{likes.length}</span>
           </div>
           <div className="flex items-center gap-1">
-            <MessageCircle className='w-4 h-4'
-            />
+            <MessageCircle className="w-4 h-4" />
             <span>{12}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Share2 className='w-4 h-4'
-            />
+            <Share2 className="w-4 h-4" />
             <span>{6}</span>
           </div>
         </div>

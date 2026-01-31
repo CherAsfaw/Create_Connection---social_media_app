@@ -7,7 +7,7 @@ const connectDB = async () => {
       console.log('Database connected')
     );
 
-    await mongoose.connect(`${process.env.MONGODB_URL}/socialApp`);
+    await mongoose.connect(`${process.env.MONGODB_URL}/${process.env.MONGODB_NAME}`);
   } catch (error) {
     console.error('Database connection failed:', error.message);
   }

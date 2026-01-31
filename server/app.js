@@ -22,4 +22,5 @@ const PORT = process.env.port || 5400;
 
 // Set up the "/api/inngest" (recommended) routes with the serve handler
 app.use("/api/inngest", serve({ client: inngest, functions }));
-app.listen(PORT, () => console.log(`The server running on port ${PORT}`));
+// app.listen(PORT, () => console.log(`The server running on port ${PORT}`));
+export default app

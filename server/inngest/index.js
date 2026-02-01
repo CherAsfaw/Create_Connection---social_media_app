@@ -1,65 +1,112 @@
 import { Inngest } from "inngest";
-import User from '../models/user.js'
+import User from "../models/user.js";
 
-// Create a client to send and receive events
+// Create Inngest client
 export const inngest = new Inngest({ id: "social-app" });
 
-// inngest function to save user data to database
+/* ----------------------------------
+   CREATE USER (clerk/user.created)
+----------------------------------- */
 const syncUserCreation = inngest.createFunction(
-  { id: "sync-user-from-work" },
+  { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
-  async ({ event}) => {
-    const { id, first_name, last_name, email_addresses, image_url } = event.data;
-    let username = email_addresses[0].email_addresses.split('@')[0];
+  async ({ event }) => {
+    try {
+      const {
+        id,
+        first_name,
+        last_name,
+        email_addresses,
+        image_url,
+      } = event.data;
 
-    // check availability user name
-    const user = await User.findOne({ username });
+      // ✅ Correct Clerk field
+      const email = email_addresses[0]?.email_address;
 
-    if (user) { 
-      username = username + Math.floor(Math.random() * 1000)
+      if (!email) {
+        throw new Error("Email not found in Clerk event");
+      }
+
+      let username = email.split("@")[0];
+
+      // Check username availability
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        username = `${username}${Math.floor(Math.random() * 1000)}`;
+      }
+
+      await User.create({
+        _id: id, // Clerk user ID
+        email,
+        full_name: `${first_name ?? ""} ${last_name ?? ""}`.trim(),
+        username,
+        profile_picture: image_url || "",
+      });
+
+      console.log("✅ User created:", id);
+    } catch (error) {
+      console.error("❌ User creation failed:", error.message);
     }
-    const userData = {
-      _id: id,
-      email: email_addresses[0].email_addresses,
-      full_name: first_name + ' ' + last_name,
-      profile_picture: image_url,
-      username
-    }
-    await User.create(userData);
-  },
+  }
 );
 
-// inngest function to update user data in database
+/* ----------------------------------
+   UPDATE USER (clerk/user.updated)
+----------------------------------- */
 const syncUserUpdate = inngest.createFunction(
-  { id: "update-user-from-work" },
+  { id: "update-user-from-clerk" },
   { event: "clerk/user.updated" },
   async ({ event }) => {
-    const { id, first_name, last_name, email_addresses, image_url } = event.data;
-    
-    const updateUserData = {
-      email: email_addresses[0].email_addresses,
-      full_name: first_name + ' ' + last_name,
-      profile_picture: image_url,
-    }
-    await User.findByIdAndUpdate(id, updateUserData)
+    try {
+      const {
+        id,
+        first_name,
+        last_name,
+        email_addresses,
+        image_url,
+      } = event.data;
 
+      const email = email_addresses[0]?.email_address;
+
+      await User.findByIdAndUpdate(
+        id,
+        {
+          email,
+          full_name: `${first_name ?? ""} ${last_name ?? ""}`.trim(),
+          profile_picture: image_url || "",
+        },
+        { new: true }
+      );
+
+      console.log("✅ User updated:", id);
+    } catch (error) {
+      console.error("❌ User update failed:", error.message);
+    }
   }
 );
 
-// inngest function to delete user data from database
+/* ----------------------------------
+   DELETE USER (clerk/user.deleted)
+----------------------------------- */
 const syncUserDelete = inngest.createFunction(
-  { id: "delete-user-from-work" },
+  { id: "delete-user-from-clerk" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
-    const { id} = event.data;
-   
-    await User.findByIdAndDelete(id)
+    try {
+      const { id } = event.data;
 
+      await User.findByIdAndDelete(id);
+
+      console.log("✅ User deleted:", id);
+    } catch (error) {
+      console.error("❌ User delete failed:", error.message);
+    }
   }
 );
-// Create an empty array where we'll export future Inngest functions
+
+// Export all functions
 export const functions = [
   syncUserCreation,
   syncUserUpdate,
-  syncUserDelete
+  syncUserDelete,
 ];
